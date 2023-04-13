@@ -27,7 +27,13 @@ public class Build {
             int blockY = block.get("y").getAsInt();
             int blockZ = block.get("z").getAsInt();
             String blockType = block.get("type").getAsString();
-            Boolean fill = block.get("fill").getAsBoolean();
+
+            boolean fill = false;
+            try {
+                fill = block.get("fill").getAsBoolean();
+            } catch (NullPointerException e) {
+                fill = false;
+            }
 
             if (fill) {
                 int endBlockX = block.get("endX").getAsInt();

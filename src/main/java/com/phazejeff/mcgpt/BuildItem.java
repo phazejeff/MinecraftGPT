@@ -39,5 +39,10 @@ public class BuildItem extends Item {
 
         return itemStack;
     }
+
+    public ItemStack updateItemStack(NbtCompound oldNbt, List<String> messages) {
+        ItemStack newItemStack = getItemStack(messages, oldNbt.getInt("x"), oldNbt.getInt("y"), oldNbt.getInt("z"));
+        return newItemStack;
+    }
 }
 

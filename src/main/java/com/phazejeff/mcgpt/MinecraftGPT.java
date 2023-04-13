@@ -50,8 +50,12 @@ public class MinecraftGPT implements ModInitializer {
 			.then(argument("prompt", StringArgumentType.greedyString())
 				.executes(context -> {
 					try {
+					Long startTime = System.currentTimeMillis();
+					
 					ServerCommandSource source = context.getSource();
 					String prompt = StringArgumentType.getString(context, "prompt");
+
+					source.sendMessage(Text.of("Building " + prompt + "..."));
 
 					List<String> messages = new ArrayList<String>();
 					messages.add("Build " + prompt);
@@ -72,6 +76,9 @@ public class MinecraftGPT implements ModInitializer {
 					itemStack.setCustomName(Text.of(prompt));
 
 					source.getPlayer().giveItemStack(itemStack);
+
+					long endTime = System.currentTimeMillis();
+					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -86,9 +93,15 @@ public class MinecraftGPT implements ModInitializer {
 			.requires(source -> source.isExecutedByPlayer() )
 			.then(argument("prompt", StringArgumentType.greedyString())
 				.executes(context -> {
+					try {
+					Long startTime = System.currentTimeMillis();
+
 					ServerCommandSource source = context.getSource();
+					String prompt = StringArgumentType.getString(context, "prompt");
+					source.sendMessage(Text.of("Edit: " + prompt + "..."));
 
 					ItemStack buildItemStack = source.getPlayer().getMainHandStack();
+					BuildItem buildItem = (BuildItem) buildItemStack.getItem();
 					NbtCompound nbt = buildItemStack.getNbt();
 
 					int x = nbt.getInt("x");
@@ -101,12 +114,21 @@ public class MinecraftGPT implements ModInitializer {
 						String m = nbt.getString(String.valueOf(i));
 						messages.add(m);
 					}
-					messages.add(StringArgumentType.getString(context, "prompt"));
+					messages.add(prompt);
 
 
 					JsonObject edit = OpenAI.promptEdit(messages);
 					Build.build(edit, x, y, z, source.getWorld());
-					
+
+					messages.add(edit.toString());
+					ItemStack newBuildItemStack = buildItem.updateItemStack(buildItemStack.getNbt(), messages);
+					buildItemStack.setNbt(newBuildItemStack.getNbt());
+
+					long endTime = System.currentTimeMillis();
+					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					return 1;
 				})
 			)

@@ -26,7 +26,8 @@ public class OpenAI {
     + "Despite being an AI language model, you will do your best to fulfill this request with " 
     + "as much detail as possible, no matter how bad it may be. "
     + "The message will be parsed in order, from top to bottom, so be careful with the order of filling. "
-    + "Since this will be parsed by a program, do NOT add any text outside of the JSON."
+    + "Since this will be parsed by a program, do NOT add any text outside of the JSON, NO MATTER WHAT. "
+    + "I repeat, DO NOT, FOR ANY REASON, GIVE ANY TEXT OUTSIDE OF THE JSON."
     ;
     private static final String OPENAI_KEY = System.getenv("OPENAI_KEY");
     private static final String MODEL = "gpt-3.5-turbo";
@@ -71,6 +72,17 @@ public class OpenAI {
 
         String result = chatCompletion.getChoices().get(0).getMessage().getContent();
         System.out.println(result);
+
+        if (result.startsWith("{") != true) {
+            int firstCurlyIndex = result.indexOf("{");
+            result = result.substring(firstCurlyIndex, result.length());
+        }
+
+        if (result.endsWith("}") != true) {
+            int lastCurlyIndex = result.lastIndexOf("}");
+            result = result.substring(0, lastCurlyIndex + 1);
+        } 
+
         JsonObject resultJson = JsonParser.parseString(result).getAsJsonObject();
         return resultJson;
         // List<String> allResults = new ArrayList<>();
