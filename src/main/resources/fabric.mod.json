@@ -16,7 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.phazejeff.mcgpt.ExampleMod"
+			"com.phazejeff.mcgpt.MinecraftGPT"
 		],
 		"client": [
 			"com.phazejeff.mcgpt.ExampleModClient"
