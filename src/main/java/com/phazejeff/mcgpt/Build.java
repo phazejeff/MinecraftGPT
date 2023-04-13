@@ -2,11 +2,14 @@ package com.phazejeff.mcgpt;
 
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import io.netty.handler.codec.json.JsonObjectDecoder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
@@ -17,6 +20,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 public class Build {
+
     public static void build(JsonObject build, int startX, int startY, int startZ, ServerWorld world) {
         List<JsonElement> blocks = build.get("blocks").getAsJsonArray().asList();
 
@@ -94,5 +98,17 @@ public class Build {
 
         BlockPos blockPos = ((BlockHitResult) blockHit).getBlockPos();
         return blockPos;
+    }
+
+    public static BuildItem makeBuildItem(List<String> messages, BlockPos zeroLocation) {
+        Pos pos = new Pos(zeroLocation.getX(), zeroLocation.getY(), zeroLocation.getZ());
+        Chat chat = new Chat(pos, messages);
+
+        Identifier id = Identifier.of("mcgpt", "build");
+        BuildItem buildItem = (BuildItem) Registries.ITEM.get(id);
+        
+        buildItem.setChat(chat);
+
+        return buildItem;
     }
 }
