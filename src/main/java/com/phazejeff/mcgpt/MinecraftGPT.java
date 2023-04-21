@@ -33,6 +33,8 @@ public class MinecraftGPT implements ModInitializer {
 
 	public static final Item BUILD_ITEM = new BuildItem(new FabricItemSettings());
 
+	public static String openai_key;
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -43,12 +45,28 @@ public class MinecraftGPT implements ModInitializer {
 
 		Registry.register(Registries.ITEM, new Identifier("mcgpt", "build"), BUILD_ITEM);
 		
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
+			literal("setkey")
+			.then(argument("key", StringArgumentType.greedyString())
+				.executes(context -> {
+					openai_key = StringArgumentType.getString(context, "key");
+
+					context.getSource().sendMessage(Text.of("Open AI key set. Use /build to get started."));
+					return 1;
+				})
+			)
+
+		));
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
 			literal("build")
 			.requires(source -> source.isExecutedByPlayer())
 			.then(argument("prompt", StringArgumentType.greedyString())
 				.executes(context -> {
+					if (openai_key.isEmpty()) {
+						context.getSource().sendMessage(Text.of("Please set your openai key with /setkey"));
+					}
+
 					try {
 					Long startTime = System.currentTimeMillis();
 					
@@ -78,9 +96,10 @@ public class MinecraftGPT implements ModInitializer {
 					source.getPlayer().giveItemStack(itemStack);
 
 					long endTime = System.currentTimeMillis();
-					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
+					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000.0f) + " seconds"));
 					} catch (Exception e) {
 						e.printStackTrace();
+						context.getSource().sendMessage(Text.of(e.toString()));
 					}
 					
 					return 1;
@@ -93,6 +112,10 @@ public class MinecraftGPT implements ModInitializer {
 			.requires(source -> source.isExecutedByPlayer() )
 			.then(argument("prompt", StringArgumentType.greedyString())
 				.executes(context -> {
+					if (openai_key.isEmpty()) {
+						context.getSource().sendMessage(Text.of("Please set your openai key with /setkey"));
+					}
+					
 					try {
 					Long startTime = System.currentTimeMillis();
 
@@ -103,6 +126,7 @@ public class MinecraftGPT implements ModInitializer {
 					ItemStack buildItemStack = source.getPlayer().getMainHandStack();
 					BuildItem buildItem = (BuildItem) buildItemStack.getItem();
 					NbtCompound nbt = buildItemStack.getNbt();
+					Text name = buildItemStack.getName();
 
 					int x = nbt.getInt("x");
 					int y = nbt.getInt("y");
@@ -123,11 +147,13 @@ public class MinecraftGPT implements ModInitializer {
 					messages.add(edit.toString());
 					ItemStack newBuildItemStack = buildItem.updateItemStack(buildItemStack.getNbt(), messages);
 					buildItemStack.setNbt(newBuildItemStack.getNbt());
+					buildItemStack.setCustomName(name);
 
 					long endTime = System.currentTimeMillis();
 					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
 					} catch (Exception e) {
 						e.printStackTrace();
+						context.getSource().sendMessage(Text.of(e.toString()));
 					}
 					return 1;
 				})

@@ -29,7 +29,7 @@ public class OpenAI {
     + "Since this will be parsed by a program, do NOT add any text outside of the JSON, NO MATTER WHAT. "
     + "I repeat, DO NOT, FOR ANY REASON, GIVE ANY TEXT OUTSIDE OF THE JSON."
     ;
-    private static final String OPENAI_KEY = System.getenv("OPENAI_KEY");
+
     private static final String MODEL = "gpt-3.5-turbo";
     // private static final String MODEL = "gpt-4";
 
@@ -61,7 +61,7 @@ public class OpenAI {
     
 
     private static JsonObject getResponse(List<ChatMessage> messages) {
-        OpenAiService service = new OpenAiService(OPENAI_KEY, Duration.ofSeconds(5000));
+        OpenAiService service = new OpenAiService(MinecraftGPT.openai_key, Duration.ofSeconds(5000));
 
         ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
             .messages(messages)
