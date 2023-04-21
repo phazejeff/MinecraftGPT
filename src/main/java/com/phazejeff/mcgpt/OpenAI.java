@@ -30,9 +30,6 @@ public class OpenAI {
     + "I repeat, DO NOT, FOR ANY REASON, GIVE ANY TEXT OUTSIDE OF THE JSON."
     ;
 
-    private static final String MODEL = "gpt-3.5-turbo";
-    // private static final String MODEL = "gpt-4";
-
 
     public static JsonObject promptBuild(String prompt) {
         List<ChatMessage> messages = new ArrayList<>();
@@ -62,10 +59,11 @@ public class OpenAI {
 
     private static JsonObject getResponse(List<ChatMessage> messages) {
         OpenAiService service = new OpenAiService(MinecraftGPT.openai_key, Duration.ofSeconds(5000));
+        String model = MinecraftGPT.gpt4 ? "gpt-4" : "gpt-3.5-turbo";
 
         ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
             .messages(messages)
-            .model(MODEL)
+            .model(model)
             .build();
 
         ChatCompletionResult chatCompletion = service.createChatCompletion(completionRequest);

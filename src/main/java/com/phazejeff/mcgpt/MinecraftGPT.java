@@ -34,6 +34,7 @@ public class MinecraftGPT implements ModInitializer {
 	public static final Item BUILD_ITEM = new BuildItem(new FabricItemSettings());
 
 	public static String openai_key;
+	public static boolean gpt4 = false;
 
 	@Override
 	public void onInitialize() {
@@ -44,6 +45,15 @@ public class MinecraftGPT implements ModInitializer {
 		LOGGER.info("Starting McGPT!");
 
 		Registry.register(Registries.ITEM, new Identifier("mcgpt", "build"), BUILD_ITEM);
+
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
+			literal("gpt4")
+			.executes(context -> {
+				gpt4 = !gpt4;
+				context.getSource().sendMessage(Text.of("GPT4 now set to " + gpt4));
+				return 0;
+			})
+		));
 		
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
 			literal("setkey")
