@@ -63,8 +63,9 @@ public class MinecraftGPT implements ModInitializer {
 			.requires(source -> source.isExecutedByPlayer())
 			.then(argument("prompt", StringArgumentType.greedyString())
 				.executes(context -> {
-					if (openai_key.isEmpty()) {
+					if (openai_key == null) {
 						context.getSource().sendMessage(Text.of("Please set your openai key with /setkey"));
+						return 0;
 					}
 
 					try {
@@ -112,10 +113,11 @@ public class MinecraftGPT implements ModInitializer {
 			.requires(source -> source.isExecutedByPlayer() )
 			.then(argument("prompt", StringArgumentType.greedyString())
 				.executes(context -> {
-					if (openai_key.isEmpty()) {
+					if (openai_key == null) {
 						context.getSource().sendMessage(Text.of("Please set your openai key with /setkey"));
+						return 0;
 					}
-					
+
 					try {
 					Long startTime = System.currentTimeMillis();
 
@@ -124,6 +126,12 @@ public class MinecraftGPT implements ModInitializer {
 					source.sendMessage(Text.of("Edit: " + prompt + "..."));
 
 					ItemStack buildItemStack = source.getPlayer().getMainHandStack();
+
+					if (!buildItemStack.getItem().equals(BUILD_ITEM)) {
+						source.sendMessage(Text.of("Please be holding a build item (given by /build) to use this."));
+						return 1;
+					}
+
 					BuildItem buildItem = (BuildItem) buildItemStack.getItem();
 					NbtCompound nbt = buildItemStack.getNbt();
 					Text name = buildItemStack.getName();
