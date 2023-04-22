@@ -86,28 +86,29 @@ public class MinecraftGPT implements ModInitializer {
 
 					source.sendMessage(Text.of("Building " + prompt + "..."));
 
-					List<String> messages = new ArrayList<String>();
-					messages.add("Build " + prompt);
+					new Thread(() -> {
+						List<String> messages = new ArrayList<String>();
+						messages.add("Build " + prompt);
 
-					BlockPos blockPos = Build.getTargettedBlock(source);
-					JsonObject build = OpenAI.promptBuild(prompt); // TODO put this in a seperate thread so it doesn't freeze mc
-					
-					messages.add(build.toString());
+						BlockPos blockPos = Build.getTargettedBlock(source);
+						JsonObject build = OpenAI.promptBuild(prompt); // TODO put this in a seperate thread so it doesn't freeze mc
+						messages.add(build.toString());
 
-					ServerWorld world = source.getWorld();
+						ServerWorld world = source.getWorld();
 
-					Build.build(build, blockPos.getX(), blockPos.getY(), blockPos.getZ(), world);
-					
-					
-					BuildItem buildItem = Build.makeBuildItem(messages, blockPos);
-					ItemStack itemStack = buildItem.getItemStack(messages, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+						Build.build(build, blockPos.getX(), blockPos.getY(), blockPos.getZ(), world);
+						
+						
+						BuildItem buildItem = Build.makeBuildItem(messages, blockPos);
+						ItemStack itemStack = buildItem.getItemStack(messages, blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
-					itemStack.setCustomName(Text.of(prompt));
+						itemStack.setCustomName(Text.of(prompt));
 
-					source.getPlayer().giveItemStack(itemStack);
+						source.getPlayer().giveItemStack(itemStack);
+						long endTime = System.currentTimeMillis();
+						source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000.0f) + " seconds"));
+					}).start();
 
-					long endTime = System.currentTimeMillis();
-					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000.0f) + " seconds"));
 					} catch (Exception e) {
 						e.printStackTrace();
 						context.getSource().sendMessage(Text.of(e.toString()));
@@ -158,17 +159,19 @@ public class MinecraftGPT implements ModInitializer {
 					}
 					messages.add(prompt);
 
+					new Thread(() -> {
+						JsonObject edit = OpenAI.promptEdit(messages);
+						Build.build(edit, x, y, z, source.getWorld());
 
-					JsonObject edit = OpenAI.promptEdit(messages);
-					Build.build(edit, x, y, z, source.getWorld());
+						messages.add(edit.toString());
+						ItemStack newBuildItemStack = buildItem.updateItemStack(buildItemStack.getNbt(), messages);
+						buildItemStack.setNbt(newBuildItemStack.getNbt());
+						buildItemStack.setCustomName(name);
 
-					messages.add(edit.toString());
-					ItemStack newBuildItemStack = buildItem.updateItemStack(buildItemStack.getNbt(), messages);
-					buildItemStack.setNbt(newBuildItemStack.getNbt());
-					buildItemStack.setCustomName(name);
-
-					long endTime = System.currentTimeMillis();
-					source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
+						long endTime = System.currentTimeMillis();
+						source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
+					}).start();
+					
 					} catch (Exception e) {
 						e.printStackTrace();
 						context.getSource().sendMessage(Text.of(e.toString()));
