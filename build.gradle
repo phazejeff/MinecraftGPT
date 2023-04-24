@@ -1,7 +1,6 @@
 plugins {
 	id 'fabric-loom' version '1.1-SNAPSHOT'
 	id 'maven-publish'
-	
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -45,9 +44,7 @@ dependencies {
 
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
 
-	implementation 'com.theokanning.openai-gpt3-java:service:0.12.0' // https://github.com/TheoKanning/openai-java
-	implementation 'com.google.code.gson:gson:2.10.1'
-	// compile group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+	include implementation('com.theokanning.openai-gpt3-java:service:0.12.0') // https://github.com/TheoKanning/openai-java
 }
 
 processResources {
