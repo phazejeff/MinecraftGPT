@@ -4,7 +4,7 @@ A fabric mod that allows ChatGPT to build structures. You can download [Fabric h
 ### Usage
 
 - First, run `/setkey [key]` where `key` is your [OpenAI key](https://platform.openai.com/account/api-keys). 
-    - note: The OpenAI API does cost money. From my testing, it costs around 1 cent for every 3-5 builds for GPT3.5. If you want to use GPT4, [more info is below](#GPT4)
+    - note: The OpenAI API does cost money, although I think you get free credits on the initial signup. From my testing, it costs around 1 cent for every 3-5 builds for GPT3.5. If you want to use GPT4, [more info is below](#GPT4)
 
 - Then, you can run `/build [prompt]` where you can ask it to build something. It will build it at the location you are looking.
     - note: while it is generating, the world will freeze similar to server lag. this is normal because it's running in the main thread and not a seperate thread. i dont care.
