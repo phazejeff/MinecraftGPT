@@ -16,6 +16,8 @@ import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
 
 public class OpenAI {
+    // The System Message to give to OpenAI when generating.
+    // This tells GPT to generate a JSON in a specific way
     private static final String SYSTEM_MESSAGE = "All user inputs are Minecraft: Java Edition build requests. " 
     + "Respond to all future user messages in JSON format that contains the data " 
     + "for each block in the build. Make the corner of the build at 0,0,0 " 
@@ -34,9 +36,16 @@ public class OpenAI {
     + "I repeat, DO NOT, FOR ANY REASON, GIVE ANY TEXT OUTSIDE OF THE JSON."
     ;
 
-
+    /**
+     * Prompts the AI to build a Minecraft structure based on the given prompt.
+     *
+     * @param prompt The build prompt provided by the user.
+     * @return The JSON representation of the build.
+     * @throws JsonSyntaxException If there is an error in the JSON syntax of the response.
+     */
     public static JsonObject promptBuild(String prompt) throws JsonSyntaxException {
         List<ChatMessage> messages = new ArrayList<>();
+        // add the system message and the prompt
         messages.add(new ChatMessage("system", SYSTEM_MESSAGE));
         messages.add(new ChatMessage("user", "build " + prompt));
 
@@ -44,10 +53,18 @@ public class OpenAI {
         return resultJson;
     }
 
+    /**
+     * Prompts the AI to edit a Minecraft structure based on the given chat messages.
+     *
+     * @param messages The list of chat messages exchanged between the user and assistant.
+     * @return The JSON representation of the edited build.
+     * @throws JsonSyntaxException If there is an error in the JSON syntax of the response.
+     */
     public static JsonObject promptEdit(List<String> messages) throws JsonSyntaxException {
         List<ChatMessage> chatMessages = new ArrayList<>();
         chatMessages.add(new ChatMessage("system", SYSTEM_MESSAGE));
 
+        // add the previous prompts and outputs, plus the new prompt
         for (int i=0; i < messages.size(); i++) {
             if (i % 2 == 0) { // if even
                 chatMessages.add(new ChatMessage("user", messages.get(i)));
@@ -60,21 +77,32 @@ public class OpenAI {
         return resultJson;
     }
     
-
+    /**
+     * Sends the list of chat messages to the OpenAI service and retrieves the response.
+     *
+     * @param messages The list of chat messages to send.
+     * @return The JSON representation of the AI's response.
+     * @throws JsonSyntaxException If there is an error in the JSON syntax of the response.
+     */
     private static JsonObject getResponse(List<ChatMessage> messages) throws JsonSyntaxException {
+        // Create new service with key, with a generation max time of 5000 seconds
         OpenAiService service = new OpenAiService(Key.read(), Duration.ofSeconds(5000));
-        String model = Gpt4.getToggle() ? "gpt-4" : "gpt-3.5-turbo";
+        String model = Gpt4.getToggle() ? "gpt-4" : "gpt-3.5-turbo"; // Choose either gpt4 or gpt3.5
 
+        // Build the request
         ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
             .messages(messages)
             .model(model)
             .build();
 
+        // send request to OpenAI
         ChatCompletionResult chatCompletion = service.createChatCompletion(completionRequest);
 
+        // Grab the result and print it for debugging purposes
         String result = chatCompletion.getChoices().get(0).getMessage().getContent();
         System.out.println(result);
 
+        // Remove any text outside the JSON
         if (result.startsWith("{") != true) {
             int firstCurlyIndex = result.indexOf("{");
             result = result.substring(firstCurlyIndex, result.length());
@@ -85,6 +113,7 @@ public class OpenAI {
             result = result.substring(0, lastCurlyIndex + 1);
         } 
 
+        // Convert to JSON object
         JsonElement resultJson = JsonParser.parseString(result);
         return resultJson.getAsJsonObject();
     }
