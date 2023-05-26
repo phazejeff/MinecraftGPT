@@ -1,6 +1,8 @@
-package com.phazejeff.mcgpt;
+package com.phazejeff.mcgpt.game;
 
 import java.util.List;
+
+import com.phazejeff.mcgpt.openai.Chat;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

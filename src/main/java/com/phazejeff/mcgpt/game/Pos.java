@@ -1,4 +1,4 @@
-package com.phazejeff.mcgpt;
+package com.phazejeff.mcgpt.game;
 
 public class Pos {
     private int x;

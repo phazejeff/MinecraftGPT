@@ -1,8 +1,9 @@
-package com.phazejeff.mcgpt;
+package com.phazejeff.mcgpt.openai;
 
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.phazejeff.mcgpt.game.Pos;
 
 public class Chat {
     

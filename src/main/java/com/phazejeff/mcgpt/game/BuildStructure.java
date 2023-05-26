@@ -1,9 +1,11 @@
-package com.phazejeff.mcgpt;
+package com.phazejeff.mcgpt.game;
 
 import java.util.List;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.phazejeff.mcgpt.exceptions.InvalidBlockException;
+import com.phazejeff.mcgpt.openai.Chat;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -16,9 +18,9 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-public class Build {
+public class BuildStructure {
 
-    public static void build(JsonObject build, int startX, int startY, int startZ, ServerWorld world) {
+    public static void build(JsonObject build, int startX, int startY, int startZ, ServerWorld world) throws InvalidBlockException {
         List<JsonElement> blocks = build.get("blocks").getAsJsonArray().asList();
 
         for (JsonElement b : blocks) {
@@ -62,7 +64,7 @@ public class Build {
         int startX, int startY, int startZ, 
         int lengthX, int lengthY, int lengthZ, 
         String blockType, ServerWorld world
-    ) {
+    ) throws InvalidBlockException {
         for (int x=0; x <= lengthX; x++) {
             for (int y=0; y <= lengthY; y++) {
                 for (int z=0; z <= lengthZ; z++) {
@@ -75,17 +77,18 @@ public class Build {
         }
     }
 
-    private static void placeBlock(int x, int y, int z, String blockType, ServerWorld world) {
+    private static void placeBlock(int x, int y, int z, String blockType, ServerWorld world) throws InvalidBlockException {
         BlockPos pos = new BlockPos(x, y, z);
         BlockState blockState = getBlockState(blockType);
         world.setBlockState(pos, blockState);
     }
 
-    private static BlockState getBlockState(String blockType) {
+    private static BlockState getBlockState(String blockType) throws InvalidBlockException {
         Identifier id = Identifier.tryParse(blockType);
         Block blockMC = Registries.BLOCK.get(id);
         if (blockMC == null) {
             System.out.println("Couldn't find block for " + blockType);
+            throw new InvalidBlockException(blockType);
         }
         BlockState blockState = blockMC.getDefaultState();
 

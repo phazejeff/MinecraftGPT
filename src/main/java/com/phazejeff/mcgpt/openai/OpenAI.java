@@ -1,11 +1,15 @@
-package com.phazejeff.mcgpt;
+package com.phazejeff.mcgpt.openai;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.phazejeff.mcgpt.commands.Gpt4;
+import com.phazejeff.mcgpt.data.Key;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
@@ -31,7 +35,7 @@ public class OpenAI {
     ;
 
 
-    public static JsonObject promptBuild(String prompt) {
+    public static JsonObject promptBuild(String prompt) throws JsonSyntaxException {
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(new ChatMessage("system", SYSTEM_MESSAGE));
         messages.add(new ChatMessage("user", "build " + prompt));
@@ -40,7 +44,7 @@ public class OpenAI {
         return resultJson;
     }
 
-    public static JsonObject promptEdit(List<String> messages) {
+    public static JsonObject promptEdit(List<String> messages) throws JsonSyntaxException {
         List<ChatMessage> chatMessages = new ArrayList<>();
         chatMessages.add(new ChatMessage("system", SYSTEM_MESSAGE));
 
@@ -57,9 +61,9 @@ public class OpenAI {
     }
     
 
-    private static JsonObject getResponse(List<ChatMessage> messages) {
-        OpenAiService service = new OpenAiService(MinecraftGPT.openai_key, Duration.ofSeconds(5000));
-        String model = MinecraftGPT.gpt4 ? "gpt-4" : "gpt-3.5-turbo";
+    private static JsonObject getResponse(List<ChatMessage> messages) throws JsonSyntaxException {
+        OpenAiService service = new OpenAiService(Key.read(), Duration.ofSeconds(5000));
+        String model = Gpt4.getToggle() ? "gpt-4" : "gpt-3.5-turbo";
 
         ChatCompletionRequest completionRequest = ChatCompletionRequest.builder()
             .messages(messages)
@@ -81,52 +85,8 @@ public class OpenAI {
             result = result.substring(0, lastCurlyIndex + 1);
         } 
 
-        JsonObject resultJson = JsonParser.parseString(result).getAsJsonObject();
-        return resultJson;
-        // List<String> allResults = new ArrayList<>();
-        // String fullBuildString = "";
-
-        // boolean running = true;
-        // while (running) {
-        //     allResults.add(result);
-        //     System.out.println(result);
-        //     int resultStart = result.indexOf("<START>") + 8;
-        //     if (fullBuildString.equals("")) {
-        //         fullBuildString += result.substring(resultStart, result.length());
-        //     } else {
-        //         int lastCommaLocation = fullBuildString.lastIndexOf("},") + 2;
-        //         int firstOpenBracketLocation = result.indexOf("{");
-        //         fullBuildString = fullBuildString.substring(0, lastCommaLocation) + result.substring(firstOpenBracketLocation, result.length());
-        //     }
-            
-            
-
-        //     if (fullBuildString.contains("[END]")) {
-        //         fullBuildString = fullBuildString.substring(0, fullBuildString.indexOf("[END]"));
-        //         running = false;
-        //     } else {
-        //         // TODO combine all chatgpt messages into one json output
-
-        //         messages = new ArrayList<>();
-        //         messages.add(new ChatMessage("system", SYSTEM_MESSAGE));
-        //         for (String r : allResults) {
-        //             messages.add(new ChatMessage("assistant", r));
-        //             messages.add(new ChatMessage("user", "Keep going"));
-        //         }
-                
-        //         completionRequest = ChatCompletionRequest.builder()
-        //             .messages(messages)
-        //             .model(MODEL)
-        //             .build();
-
-        //         result = chatCompletion.getChoices().get(0).getMessage().getContent();
-        //     }
-        // }
-
-        // System.out.println("FULL: " + fullBuildString);
-        // JsonObject resultJson = JsonParser.parseString(fullBuildString).getAsJsonObject();
-
-        // return resultJson;
+        JsonElement resultJson = JsonParser.parseString(result);
+        return resultJson.getAsJsonObject();
     }
 
 }

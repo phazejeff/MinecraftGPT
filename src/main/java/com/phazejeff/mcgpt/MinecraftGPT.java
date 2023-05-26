@@ -4,26 +4,23 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 
 import static net.minecraft.server.command.CommandManager.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.phazejeff.mcgpt.commands.Build;
+import com.phazejeff.mcgpt.commands.Edit;
+import com.phazejeff.mcgpt.commands.Gpt4;
+import com.phazejeff.mcgpt.commands.SetKey;
+import com.phazejeff.mcgpt.data.Key;
+import com.phazejeff.mcgpt.game.BuildItem;
 
 public class MinecraftGPT implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -46,140 +43,62 @@ public class MinecraftGPT implements ModInitializer {
 
 		Registry.register(Registries.ITEM, new Identifier("mcgpt", "build"), BUILD_ITEM);
 
+		// note to professor: I don't think we have covered lambda expressions,
+		// but this is the only way to add a command into Minecraft.
+
+		// GPT4 toggle
+		Gpt4 gpt4Toggle = new Gpt4();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
-			literal("gpt4")
-			.executes(context -> {
-				gpt4 = !gpt4;
-				context.getSource().sendMessage(Text.of("GPT4 now set to " + gpt4));
-				return 0;
-			})
+			literal(gpt4Toggle.getName())
+			.executes(context -> gpt4Toggle.executes(context))
 		));
 		
+		// setkey command
+		SetKey setKey = new SetKey();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
-			literal("setkey")
-			.then(argument("key", StringArgumentType.greedyString())
-				.executes(context -> {
-					openai_key = StringArgumentType.getString(context, "key");
-
-					context.getSource().sendMessage(Text.of("Open AI key set. Use /build to get started."));
-					return 1;
-				})
+			literal(setKey.getName())
+			.then(argument(setKey.getArgs()[0], StringArgumentType.greedyString())
+				.executes(context -> setKey.executes(context))
 			)
-
 		));
 
+		// build command
+		Build build = new Build();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
-			literal("build")
+			literal(build.getName())
 			.requires(source -> source.isExecutedByPlayer())
-			.then(argument("prompt", StringArgumentType.greedyString())
+			.then(argument(build.getArgs()[0], StringArgumentType.greedyString())
 				.executes(context -> {
-					if (openai_key == null) {
-						context.getSource().sendMessage(Text.of("Please set your openai key with /setkey"));
+					if (Key.read() == null) {
+						Text message = Text.of("Please set your openai key with /setkey");
+						context.getSource().sendMessage(message);
 						return 0;
 					}
 
-					try {
-					Long startTime = System.currentTimeMillis();
-					
-					ServerCommandSource source = context.getSource();
-					String prompt = StringArgumentType.getString(context, "prompt");
-
-					source.sendMessage(Text.of("Building " + prompt + "..."));
-
-					new Thread(() -> {
-						List<String> messages = new ArrayList<String>();
-						messages.add("Build " + prompt);
-
-						BlockPos blockPos = Build.getTargettedBlock(source);
-						JsonObject build = OpenAI.promptBuild(prompt); // TODO put this in a seperate thread so it doesn't freeze mc
-						messages.add(build.toString());
-
-						ServerWorld world = source.getWorld();
-
-						Build.build(build, blockPos.getX(), blockPos.getY(), blockPos.getZ(), world);
-						
-						
-						BuildItem buildItem = Build.makeBuildItem(messages, blockPos);
-						ItemStack itemStack = buildItem.getItemStack(messages, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-
-						itemStack.setCustomName(Text.of(prompt));
-
-						source.getPlayer().giveItemStack(itemStack);
-						long endTime = System.currentTimeMillis();
-						source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000.0f) + " seconds"));
-					}).start();
-
-					} catch (Exception e) {
-						e.printStackTrace();
-						context.getSource().sendMessage(Text.of(e.toString()));
-					}
+					build.executes(context);
 					
 					return 1;
 				})
 			)
 		));
 		
+		// edit command
+		Edit edit = new Edit();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
-			literal("edit")
+			literal(edit.getName())
 			.requires(source -> source.isExecutedByPlayer() )
-			.then(argument("prompt", StringArgumentType.greedyString())
+			.then(argument(edit.getArgs()[0], StringArgumentType.greedyString())
 				.executes(context -> {
-					if (openai_key == null) {
-						context.getSource().sendMessage(Text.of("Please set your openai key with /setkey"));
+					if (Key.read() == null) {
+						Text message = Text.of("Please set your openai key with /setkey");
+						context.getSource().sendMessage(message);
 						return 0;
 					}
 
-					try {
-					Long startTime = System.currentTimeMillis();
-
-					ServerCommandSource source = context.getSource();
-					String prompt = StringArgumentType.getString(context, "prompt");
-					source.sendMessage(Text.of("Edit: " + prompt + "..."));
-
-					ItemStack buildItemStack = source.getPlayer().getMainHandStack();
-
-					if (!buildItemStack.getItem().equals(BUILD_ITEM)) {
-						source.sendMessage(Text.of("Please be holding a build item (given by /build) to use this."));
-						return 1;
-					}
-
-					BuildItem buildItem = (BuildItem) buildItemStack.getItem();
-					NbtCompound nbt = buildItemStack.getNbt();
-					Text name = buildItemStack.getName();
-
-					int x = nbt.getInt("x");
-					int y = nbt.getInt("y");
-					int z = nbt.getInt("z");
-
-					List<String> messages = new ArrayList<String>();
-
-					for (int i=0; i < nbt.getInt("size"); i++) {
-						String m = nbt.getString(String.valueOf(i));
-						messages.add(m);
-					}
-					messages.add(prompt);
-
-					new Thread(() -> {
-						JsonObject edit = OpenAI.promptEdit(messages);
-						Build.build(edit, x, y, z, source.getWorld());
-
-						messages.add(edit.toString());
-						ItemStack newBuildItemStack = buildItem.updateItemStack(buildItemStack.getNbt(), messages);
-						buildItemStack.setNbt(newBuildItemStack.getNbt());
-						buildItemStack.setCustomName(name);
-
-						long endTime = System.currentTimeMillis();
-						source.sendMessage(Text.of("Done in " + (float) ((endTime - startTime) / 1000) + " seconds"));
-					}).start();
-					
-					} catch (Exception e) {
-						e.printStackTrace();
-						context.getSource().sendMessage(Text.of(e.toString()));
-					}
+					edit.executes(context);
 					return 1;
 				})
 			)
 		));
-
 	}
 }
