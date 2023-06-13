@@ -1,3 +1,5 @@
+note: this is a refactor of the original version so that I could meet my project requirements for a class
+
 # Minecraft GPT
 A fabric mod that allows ChatGPT to build structures. You can download [Fabric here](https://fabricmc.net/use/installer/)
 
