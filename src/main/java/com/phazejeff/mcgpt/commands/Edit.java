@@ -21,7 +21,7 @@ import net.minecraft.text.Text;
 /**
  * Represents a command for editing the generated structure.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class Edit extends Command {

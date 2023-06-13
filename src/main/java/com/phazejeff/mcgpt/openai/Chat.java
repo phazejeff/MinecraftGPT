@@ -8,7 +8,7 @@ import com.phazejeff.mcgpt.game.Pos;
 /**
  * Represents an OpenAI chat, with context of the position in Minecraft
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class Chat {

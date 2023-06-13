@@ -7,7 +7,7 @@ import net.minecraft.server.command.ServerCommandSource;
 /**
  * Represents an abstract Minecraft command.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public abstract class Command {

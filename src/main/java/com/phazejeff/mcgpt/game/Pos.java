@@ -4,7 +4,7 @@ package com.phazejeff.mcgpt.game;
  * Represents an xyz position in Minecraft.
  * Cannot be edited once instantiated.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class Pos {

@@ -17,18 +17,8 @@
 	"entrypoints": {
 		"main": [
 			"com.phazejeff.mcgpt.MinecraftGPT"
-		],
-		"client": [
-			"com.phazejeff.mcgpt.ExampleModClient"
 		]
 	},
-	"mixins": [
-		"minecraftgpt.mixins.json",
-		{
-			"config": "minecraftgpt.client.mixins.json",
-			"environment": "client"
-		}
-	],
 	"depends": {
 		"fabricloader": ">=0.14.19",
 		"minecraft": "~1.19.4",

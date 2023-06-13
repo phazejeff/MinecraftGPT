@@ -8,8 +8,9 @@ import java.util.Scanner;
 
 /**
  * Utility class for reading and writing the API key to a file.
+ * Uses Text File I/O
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class Key {

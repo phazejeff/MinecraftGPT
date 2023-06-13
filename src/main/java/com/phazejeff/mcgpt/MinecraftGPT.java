@@ -68,7 +68,10 @@ import com.phazejeff.mcgpt.game.BuildItem;
  * 	</li>
  * </ul>
  * 
- * @author Marcus Beckerman
+ * <p><b>Items included:<b> Text File I/O (in data.Key), Abstract class (commands.Command), exception class (exceptions.InvalidBlockException),
+ * Inheritance (Everything inside of commands) and Polymorphism (some of the equals and toString methods in the commands)
+ * 
+ * @author phazejeff
  * @version 1.0
  */
 public class MinecraftGPT implements ModInitializer {
@@ -79,6 +82,7 @@ public class MinecraftGPT implements ModInitializer {
 
 	public static final Item BUILD_ITEM = new BuildItem(new FabricItemSettings());
 
+	// This is the "main" method that gets called
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.

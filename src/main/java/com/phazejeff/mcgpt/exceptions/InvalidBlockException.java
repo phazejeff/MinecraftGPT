@@ -3,7 +3,7 @@ package com.phazejeff.mcgpt.exceptions;
 /**
  * Exception thrown when an invalid Minecraft block is encountered.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class InvalidBlockException extends Exception {

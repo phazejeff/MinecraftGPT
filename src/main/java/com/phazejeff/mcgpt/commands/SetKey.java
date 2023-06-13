@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 /**
  * Represents a command for setting the API key.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class SetKey extends Command {

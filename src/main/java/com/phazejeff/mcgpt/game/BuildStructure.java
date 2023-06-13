@@ -21,7 +21,7 @@ import net.minecraft.util.math.BlockPos;
 /**
  * A utility class for building structures in Minecraft based on a specific JSON.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class BuildStructure {
@@ -142,7 +142,7 @@ public class BuildStructure {
         Block blockMC = Registries.BLOCK.get(id);
 
         // If the block doesn't exist, throw custom exception
-        if (blockMC == null) {
+        if (id == null) {
             System.out.println("Couldn't find block for " + blockType);
             throw new InvalidBlockException(blockType);
         }

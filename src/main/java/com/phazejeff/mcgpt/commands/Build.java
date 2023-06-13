@@ -21,7 +21,7 @@ import net.minecraft.util.math.BlockPos;
 /**
  * Represents a command for building.
  * 
- * @author Marcus Beckerman
+ * @author phazejeff
  * @version 1.0
  */
 public class Build extends Command {
