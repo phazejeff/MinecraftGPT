@@ -1,5 +1,5 @@
 # Minecraft GPT
-A fabric mod that allows ChatGPT to build structures. You can download [Fabric here](https://fabricmc.net/use/installer/)
+A fabric mod that allows ChatGPT to build structures. You can download [Fabric here](https://fabricmc.net/use/installer/). Here is a [video demo](https://www.reddit.com/r/Minecraft/comments/1305p4e/i_made_a_minecraft_mod_that_lets_chatgpt_build/?utm_source=share&utm_medium=web2x&context=3).
 
 ### Usage
 
